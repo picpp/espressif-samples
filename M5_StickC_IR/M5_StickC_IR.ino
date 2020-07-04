@@ -3,11 +3,8 @@
 #include <IRutils.h>
 
 // Set the GPIO to be used to sending the message.
-#define IR_LED 9
-IRsend irsend(IR_LED);
+IRsend irsend(M5_IR);
 
-// Internal red LED
-#define RED_LED_PIN 10
 // setting PWM properties
 const int freq = 5000;
 const int ledChannel = 0;
@@ -22,11 +19,11 @@ void setup() {
   M5.Axp.SetLDO2(false);
 
   // Turn on internal red LED
-  pinMode(RED_LED_PIN, OUTPUT);
+  pinMode(M5_LED, OUTPUT);
   // configure LED PWM functionalitites
   ledcSetup(ledChannel, freq, resolution);
   // attach the channel to the GPIO to be controlled
-  ledcAttachPin(RED_LED_PIN, ledChannel);
+  ledcAttachPin(M5_LED, ledChannel);
   // changing the LED brightness with PWM (0-255)
   ledcWrite(ledChannel, 0xFF<<1);
 
