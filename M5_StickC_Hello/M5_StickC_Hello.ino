@@ -1,7 +1,5 @@
 #include <M5StickC.h>
 
-#define RED_LED_PIN 10
-
 int n = 0;
 
 // the setup routine runs once when M5StickC starts up
@@ -10,8 +8,8 @@ void setup(){
   M5.begin();
 
   // Internal red LED
-  pinMode(RED_LED_PIN, OUTPUT);
-  digitalWrite(RED_LED_PIN, HIGH);
+  pinMode(M5_LED, OUTPUT);
+  digitalWrite(M5_LED, HIGH);
 
   // LCD display
   M5.Lcd.setRotation(1);
@@ -58,7 +56,7 @@ void loop() {
 
   if (M5.BtnB.wasPressed()) {
     // Toggle LED state
-    digitalWrite(RED_LED_PIN, !digitalRead(RED_LED_PIN));
+    digitalWrite(M5_LED, !digitalRead(M5_LED));
   }
 
 
