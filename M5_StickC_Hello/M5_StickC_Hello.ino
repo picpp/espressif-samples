@@ -1,11 +1,17 @@
 #include <M5StickC.h>
 
+#define RED_LED_PIN 10
+
 int n = 0;
 
 // the setup routine runs once when M5StickC starts up
 void setup(){
   // Initialize the M5StickC object
   M5.begin();
+
+  // Internal red LED
+  pinMode(RED_LED_PIN, OUTPUT);
+  digitalWrite(RED_LED_PIN, HIGH);
 
   // LCD display
   M5.Lcd.setRotation(1);
@@ -19,6 +25,7 @@ void setup(){
 
 // the loop routine runs over and over again forever
 void loop() {
+
   if (M5.BtnA.wasReleased()) {
     n++;
     if (n>18) n = 0;
@@ -48,6 +55,12 @@ void loop() {
     M5.Lcd.setCursor(0, 0);
     M5.Lcd.print("Hello, World!");
   }
+
+  if (M5.BtnB.wasPressed()) {
+    // Toggle LED state
+    digitalWrite(RED_LED_PIN, !digitalRead(RED_LED_PIN));
+  }
+
 
   M5.update();
   checkAXPPress();
