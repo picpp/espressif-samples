@@ -19,6 +19,10 @@ char mqtt_port[6] = "1883";
 // Flag for saving data
 bool shouldSaveConfig = false;
 
+// Timeout to power off (2 min = 120 s)
+int powerOffDelay = 120e3;
+long powerOffTimeout = 0;
+
 void setup()
 {
   // Initialize the M5StickC object
@@ -131,6 +135,8 @@ void setup()
   M5.Lcd.fillScreen(TFT_BLACK);
   // Turn off LCD backlight
   M5.Axp.SetLDO2(false);
+  // Auto Power-Off
+  powerOffTimeout = millis() + powerOffDelay;
 }
 
 void loop()
@@ -169,6 +175,8 @@ void loop()
       }
     }
     digitalWrite(M5_LED, HIGH);
+    // Auto Power-Off
+    powerOffTimeout = millis() + powerOffDelay;
   }
 
   // Button B
@@ -197,6 +205,22 @@ void loop()
       }
     }
     digitalWrite(M5_LED, HIGH);
+    // Auto Power-Off
+    powerOffTimeout = millis() + powerOffDelay;
+  }
+
+  // Auto Power-off after inactivity
+  if (millis() > powerOffTimeout) {
+    // Blink for 0.5 sec.
+    for (int i = 0; i < 12; i++) {
+      digitalWrite(M5_LED, !digitalRead(M5_LED));
+      delay(40);
+    }
+    // Wifi off
+    WiFi.disconnect();
+    WiFi.mode(WIFI_OFF);
+    // Power off
+    M5.Axp.PowerOff();
   }
 
   delay(50);
