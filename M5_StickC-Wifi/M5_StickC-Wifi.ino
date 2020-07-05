@@ -23,14 +23,20 @@ void setup()
 {
   // Initialize the M5StickC object
   M5.begin();
-  // Turn off LCD backlight
-  M5.Axp.SetLDO2(false);
 
   // Internal red LED
   pinMode(M5_LED, OUTPUT);
   digitalWrite(M5_LED, HIGH);
 
-  // explicitly set mode, esp defaults to STA+AP
+  // LCD display
+  M5.Lcd.setRotation(1);
+  M5.Lcd.setCursor(8, 8);
+  M5.Lcd.println("Connecting to WiFi...");
+
+  // Wifi off
+  WiFi.disconnect();
+  WiFi.mode(WIFI_OFF);
+  // Explicitly set mode, esp defaults to STA+AP
   WiFi.mode(WIFI_STA);
 
   //WiFiManager
@@ -120,6 +126,11 @@ void setup()
 
   delay(200);
   M5.update();
+
+  // Clear Display
+  M5.Lcd.fillScreen(TFT_BLACK);
+  // Turn off LCD backlight
+  M5.Axp.SetLDO2(false);
 }
 
 void loop()
