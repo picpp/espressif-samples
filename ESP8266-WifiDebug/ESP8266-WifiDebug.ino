@@ -110,6 +110,7 @@ void setup() {
   Serial.begin(115200);
   delay(10);
   Serial.println();
+  Serial.println(__FILE__ " " __DATE__ " " __TIME__);
 
   // Debug
   Serial.println(wl_status_to_string(WiFi.status()));
