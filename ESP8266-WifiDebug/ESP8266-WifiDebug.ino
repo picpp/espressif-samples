@@ -21,49 +21,53 @@ const char* wl_status_to_string(wl_status_t status) {
 }
 
 void WiFiEvent(WiFiEvent_t event) {
-  Serial.printf("[WiFi-event] event: %d\n", event);
 
   switch(event) {
+
     case WIFI_EVENT_STAMODE_CONNECTED:
-      Serial.println("WiFi connected");
+      Serial.println("[WiFi-event] Connected");
       break;
 
     case WIFI_EVENT_STAMODE_DISCONNECTED:
-      Serial.println("WiFi disconnected");
+      Serial.println("[WiFi-event] Disconnected");
       break;
 
     case WIFI_EVENT_STAMODE_AUTHMODE_CHANGE:
-      Serial.println("WiFi authmode change");
+      Serial.println("[WiFi-event] Authmode change");
       break;
 
     case WIFI_EVENT_STAMODE_GOT_IP:
-      Serial.println("WiFi connected");
-      Serial.println("IP address: ");
+      Serial.println("[WiFi-event] Connected");
+      Serial.print("IP address: ");
       Serial.println(WiFi.localIP());
       break;
 
     case WIFI_EVENT_STAMODE_DHCP_TIMEOUT:
-      Serial.println("WiFi DHCP timeout");
+      Serial.println("[WiFi-event] DHCP timeout");
       break;
 
     case WIFI_EVENT_SOFTAPMODE_STACONNECTED:
-      Serial.println("WiFi AP connected");
+      Serial.println("[WiFi-event] AP connected");
       break;
 
     case WIFI_EVENT_SOFTAPMODE_STADISCONNECTED:
-      Serial.println("WiFi AP disconnected");
+      Serial.println("[WiFi-event] AP disconnected");
       break;
 
     case WIFI_EVENT_SOFTAPMODE_PROBEREQRECVED:
-      Serial.println("WiFi AP probe request received");
+      Serial.println("[WiFi-event] AP probe request received");
       break;
 
     case WIFI_EVENT_MODE_CHANGE:
-      Serial.println("WiFi mode changed");
+      Serial.println("[WiFi-event] Mode changed");
       break;
 
     case WIFI_EVENT_SOFTAPMODE_DISTRIBUTE_STA_IP:
-      Serial.println("WiFi AP distribute IP");
+      Serial.println("[WiFi-event] AP distribute IP");
+      break;
+
+    default:
+      Serial.printf("[WiFi-event] Event: %d\n", event);
       break;
   }
 }
