@@ -27,6 +27,10 @@ void setup()
   M5.begin(true, false, true);
   delay(10);
   M5.dis.clear();
+
+    // Wifi off
+  WiFi.disconnect();
+  WiFi.mode(WIFI_OFF);
   // explicitly set mode, esp defaults to STA+AP
   WiFi.mode(WIFI_STA);
 
@@ -45,6 +49,8 @@ void setup()
   // wm.setScanDispPerc(true);       // show RSSI as percentage not graph icons
   //
   // wm.setBreakAfterConfig(true);   // always exit configportal even if wifi save fails
+  // This is sometimes necessary, it is still unknown when and why this is needed but it may solve some race condition or bug in esp SDK/lib
+  // wm.setCleanConnect(true); // disconnect before connect, clean connect
 
   // The extra parameters to be configured (can be either global or just in the setup)
   // After connecting, parameter.getValue() will get you the configured value
@@ -86,6 +92,16 @@ void setup()
   prefs.end();
   s_mqtt_server.toCharArray(mqtt_server, 41);
   s_mqtt_port.toCharArray(mqtt_port, 7);
+
+  // Workarround for connection issue (WL_STATION_WRONG_PASSWORD)
+  // see https://github.com/tzapu/WiFiManager/issues/979
+  wm.setEnableConfigPortal(false);
+  if(!wm.autoConnect()) {
+    WiFi.disconnect();
+    WiFi.mode(WIFI_OFF);
+    wm.setEnableConfigPortal(true);
+    wm.autoConnect();
+  }
 
   if (!wm.autoConnect()) {
     //reset and try again, or maybe put it to deep sleep
