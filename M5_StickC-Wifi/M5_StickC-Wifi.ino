@@ -19,6 +19,10 @@ char mqtt_port[6] = "1883";
 // Flag for saving data
 bool shouldSaveConfig = false;
 
+// Timeout to switch display off (5 s)
+int displayOffDelay = 5e3;
+long displayOffTimeout = 0;
+
 // Timeout to power off (2 min = 120 s)
 int powerOffDelay = 120e3;
 long powerOffTimeout = 0;
@@ -155,6 +159,8 @@ void loop()
     if (mqtt.connect("M5-StickC", NULL, NULL, "/dev/m5stickc/connected", 0, false, "0")) {
       // Once connected, publish an announcement...
       mqtt.publish("/dev/m5stickc/connected", "1");
+      // ... and subscribe
+      mqtt.subscribe("/dev/m5stickc/color");
     }
   }
   mqtt.loop();
@@ -219,6 +225,16 @@ void loop()
     powerOffTimeout = millis() + powerOffDelay;
   }
 
+  // Switch display off
+  if (displayOffTimeout != 0 && millis() > displayOffTimeout) {
+    // Clear Display
+    M5.Lcd.fillScreen(TFT_BLACK);
+    // Turn off LCD backlight
+    M5.Axp.SetLDO2(false);
+    // Done
+    displayOffTimeout = 0;
+  }
+
   // Auto Power-off after inactivity
   if (millis() > powerOffTimeout) {
     // Blink for 0.5 sec.
@@ -257,6 +273,23 @@ void checkAXPPress() {
 }
 
 void mqttCallback(char* topic, byte* payload, unsigned int length) {
+  String response;
+  for (int i = 0; i < length; i++) {
+    response += (char) payload[i];
+  }
+
+  if (strcmp(topic, "/dev/m5stickc/color") == 0) {
+    // Display Color
+    if (response == "red") {
+      M5.Lcd.fillScreen(TFT_RED);
+    } else if (response == "green") {
+      M5.Lcd.fillScreen(TFT_GREEN);
+    }
+    // Turn on LCD backlight
+    M5.Axp.SetLDO2(true);
+    // Set display off time (
+    displayOffTimeout = millis() + displayOffDelay;
+  }
 }
 
 void saveConfigCallback () {
