@@ -104,6 +104,16 @@ void setup()
   s_mqtt_server.toCharArray(mqtt_server, 41);
   s_mqtt_port.toCharArray(mqtt_port, 7);
 
+  // Workarround for connection issue (WL_STATION_WRONG_PASSWORD)
+  // see https://github.com/tzapu/WiFiManager/issues/979
+  wm.setEnableConfigPortal(false);
+  if(!wm.autoConnect()) {
+    WiFi.disconnect();
+    WiFi.mode(WIFI_OFF);
+    wm.setEnableConfigPortal(true);
+    wm.autoConnect();
+  }
+
   if (!wm.autoConnect()) {
     //reset and try again, or maybe put it to deep sleep
     ESP.restart();
