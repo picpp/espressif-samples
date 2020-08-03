@@ -28,8 +28,8 @@ void setup()
   delay(10);
   M5.dis.clear();
 
-    // Wifi off
-  WiFi.disconnect();
+  // Wifi off
+  WiFi.disconnect(true);
   WiFi.mode(WIFI_OFF);
   // explicitly set mode, esp defaults to STA+AP
   WiFi.mode(WIFI_STA);
@@ -64,7 +64,7 @@ void setup()
   wm.setSaveConfigCallback(saveConfigCallback);
 
   M5.update();
-  while (M5.Btn.isPressed()) {      
+  while (M5.Btn.isPressed()) {
     M5.dis.drawpix(0, 0xFF0000);
     delay(50);
     M5.update();
@@ -147,7 +147,16 @@ void loop()
   if (M5.Btn.wasPressed())
   {
     M5.dis.drawpix(0, 0x0000FF);
-    if (mqtt.publish("/dev/m5atom/button", "1")) {
+    String payload = "1";
+    while (M5.Btn.isPressed()) {
+      delay(50);
+      M5.update();
+      if (M5.Btn.pressedFor(1000)) {
+        payload = "2";
+        break;
+      }
+    }
+    if (mqtt.publish("/dev/m5atom/button", (char*) payload.c_str())) {
       M5.dis.drawpix(0, 0x880000);
       delay(200);
     } else {
