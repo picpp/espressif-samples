@@ -22,11 +22,19 @@ char mqtt_port[6] = "1883";
 // Flag for saving data
 bool shouldSaveConfig = false;
 
+// Timeout to power off (0,5 min = 30 s)
+int powerOffDelay = 30e3;
+long powerOffTimeout = 0;
+
 void setup()
 {
   M5.begin(true, false, true);
   delay(10);
   M5.dis.clear();
+
+  Serial.begin(115200);
+  Serial.println();
+  Serial.println(__FILE__ " " __DATE__ " " __TIME__);
 
   // Wifi off
   WiFi.disconnect(true);
@@ -129,6 +137,9 @@ void setup()
   mqtt.setServer(mqtt_server, atoi(mqtt_port));
   mqtt.setCallback(mqttCallback);
 
+  // Auto Power-Off
+  powerOffTimeout = millis() + powerOffDelay;
+
   delay(200);
   M5.dis.clear();
   M5.update();
@@ -174,6 +185,24 @@ void loop()
       delay(500);
     }
     M5.dis.clear();
+    // Auto Power-Off
+    powerOffTimeout = millis() + powerOffDelay;
+  }
+
+  // Auto Power-off after inactivity
+  if (millis() > powerOffTimeout) {
+    // Flash for 0.2 sec.
+    M5.dis.drawpix(0, 0x000088);
+    mqtt.publish("/dev/m5atom/sleep", "");
+    delay(200);
+    M5.dis.clear();
+    // Wifi off
+    WiFi.disconnect();
+    WiFi.mode(WIFI_OFF);
+    // Configure GPIO39 as ext0 wake up source for LOW logic level
+    esp_sleep_enable_ext0_wakeup(GPIO_NUM_39, 0);
+    //Go to sleep now
+    esp_deep_sleep_start();
   }
 
   delay(50);
