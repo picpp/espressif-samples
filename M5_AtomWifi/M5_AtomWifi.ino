@@ -168,20 +168,20 @@ void loop()
       }
     }
     if (mqtt.publish("/dev/m5atom/button", (char*) payload.c_str())) {
-      M5.dis.drawpix(0, 0x880000);
+      M5.dis.drawpix(0, 0x008800);
       delay(200);
     } else {
-      M5.dis.drawpix(0, 0x008800);
+      M5.dis.drawpix(0, 0x880000);
       delay(500);
     }
   }
   if (M5.Btn.wasReleased())
   {
     if (mqtt.publish("/dev/m5atom/button", "0")) {
-      M5.dis.drawpix(0, 0x880000);
+      M5.dis.drawpix(0, 0x008800);
       delay(200);
     } else {
-      M5.dis.drawpix(0, 0x008800);
+      M5.dis.drawpix(0, 0x880000);
       delay(500);
     }
     M5.dis.clear();
