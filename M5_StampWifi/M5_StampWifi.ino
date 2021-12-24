@@ -1,5 +1,6 @@
 #include "Arduino.h"
 #include "Button.h"
+#include <rom/rtc.h>
 #include <WiFi.h>
 #include <WiFiManager.h>  // https://github.com/tzapu/WiFiManager
 #include <WebServer.h>
@@ -31,6 +32,9 @@ char mqtt_port[6] = "1883";
 
 // Flag for saving data
 bool shouldSaveConfig = false;
+
+// Wakeup after Deepsleep Button
+boolean buttonWakeup = false;
 
 // Timeout to power off (0,5 min = 30 s)
 int powerOffDelay = 30e3;
@@ -82,8 +86,13 @@ void setup()
   // Set config save notify callback
   wm.setSaveConfigCallback(saveConfigCallback);
 
+  // Wakeup after Deepsleep (DEEPSLEEP_RESET)
+  if (rtc_get_reset_reason(0) == 5) {
+    buttonWakeup = true;
+  }
+
   Btn.read();
-  while (Btn.isPressed()) {
+  while (Btn.isPressed() && !buttonWakeup) {
     leds[0] = 0xf00000;
     FastLED.show();
     delay(50);
@@ -101,7 +110,6 @@ void setup()
       delay(1000);
     }
   }
-  Btn.read();
 
   leds[0] = 0x00000f;
   FastLED.show();
@@ -170,8 +178,7 @@ void loop()
   }
   mqtt.loop();
 
-  Btn.read();
-  if (Btn.wasPressed())
+  if (Btn.wasPressed() || buttonWakeup)
   {
     leds[0] = 0x0000f0;
     FastLED.show();
@@ -192,6 +199,15 @@ void loop()
       leds[0] = 0xf00000;
       FastLED.show();
       delay(500);
+    }
+    // Wakeup done
+    if (buttonWakeup) {
+      buttonWakeup = false;
+      if (!Btn.isPressed()) {
+        mqtt.publish("/dev/m5stamp/button", "0");
+        leds[0] = 0x000000;
+        FastLED.show();
+      }
     }
   }
   if (Btn.wasReleased())
@@ -219,6 +235,7 @@ void loop()
     // Wifi off
     WiFi.disconnect();
     WiFi.mode(WIFI_OFF);
+    delay(20);
     // Configure GPIO39 as ext0 wake up source for LOW logic level
     esp_sleep_enable_ext0_wakeup(GPIO_NUM_39, 0);
     //Go to sleep now
@@ -226,6 +243,7 @@ void loop()
   }
 
   delay(50);
+  Btn.read();
 }
 
 void mqttCallback(char* topic, byte* payload, unsigned int length) {
